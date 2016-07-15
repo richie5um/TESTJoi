@@ -4,8 +4,9 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
+    "build": "tsc",
     "start": "tsc || node src/index.js",
-    "test": "tsc || ./node_modules/.bin/jasmine"
+    "test": "./node_modules/.bin/istanbul cover -i \"src/*.js\" --include-all-sources ./node_modules/.bin/jasmine"
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +15,7 @@
     "lodash": "^4.13.1"
   },
   "devDependencies": {
+    "istanbul": "^0.4.4",
     "jasmine": "^2.4.1"
   }
 }
