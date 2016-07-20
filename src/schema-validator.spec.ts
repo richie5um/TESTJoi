@@ -12,8 +12,8 @@ describe('Index Validation', () => {
             beforeAll(() => {
                 this.schema = {
                     $type: 'object',
-                    $properties: ['hello', 'world'],
-                    $required: ['hello'],
+                    $properties: ['hello', 'world', 'deep'],
+                    $required: ['hello', 'deep'],
                     hello: {
                         $type: 'number',
                         $minimum: 1,
@@ -21,18 +21,48 @@ describe('Index Validation', () => {
                     },
                     world: {
                         $type: 'boolean',
+                    },
+                    deep: {
+                        $type: 'object',
+                        $properties: ['subDeep'],
+                        subDeep: {
+                            $type: 'number',
+                            $maximum: 10
+                        }
                     }
                 }
             });
 
-            it('valid object', () => {
+            it('valid shallow object', () => {
 	             let obj = {
                     hello: 2,
                     world: false
                 };
 
+                 expect(SchemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(true);
+            });
+
+            it('invalid deep object', () => {
+	             let obj = {
+                    hello: 2,
+                    world: false
+                };
+
+                 expect(SchemaValidator.validate(this.schema, obj).isValid).toBe(false);
+            });
+
+            it('valid deep object', () => {
+	             let obj = {
+                    hello: 2,
+                    world: false,
+                    deep: {
+                        subDeep: 2
+                    }
+                };
+
                  expect(SchemaValidator.validate(this.schema, obj).isValid).toBe(true);
             });
+
 
             it('invalid object - number too big', () => {
 	             let obj = {
@@ -40,8 +70,7 @@ describe('Index Validation', () => {
                     world: false
                 };
 
-                console.log(SchemaValidator.validate(this.schema, obj));
-                expect(SchemaValidator.validate(this.schema, obj).isValid).toBe(false);
+                expect(SchemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(false);
             });
 
             it('required', () => {
@@ -49,7 +78,7 @@ describe('Index Validation', () => {
                     hello: 3
                 };
 
-                expect(SchemaValidator.validate(this.schema, obj).isValid).toBe(true);
+                expect(SchemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(true);
             });
 
             it('missing required', () => {

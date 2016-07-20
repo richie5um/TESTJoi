@@ -20,26 +20,27 @@ export function validate(schema, payload, options?) {
 function generateSchemaValidator(schema, options?) {
     let schemaValidator;
     if ('object' === schema.$type) {
-        schemaValidator = Joi.object();
-
         if (_.has(options, 'depth')) {
             --options.depth;
         }
 
         if (!_.has(options, 'depth') || 0 <= options.depth) {
+            schemaValidator = Joi.object();
+
             for (let i = 0; schema.$properties && i < schema.$properties.length; ++i) {
                 let property = schema.$properties[i];
                 let propertySchema = schema[property];
 
-                let propertySchemaValidator = generateSchemaValidator(propertySchema);
+                let propertySchemaValidator = generateSchemaValidator(propertySchema, options);
+                if (propertySchemaValidator) {
+                    if (!schema.$required || _.includes(schema.$required, property)) {
+                        propertySchemaValidator = propertySchemaValidator.required();
+                    }
 
-                if (!schema.$required || _.includes(schema.$required, property)) {
-                    propertySchemaValidator = propertySchemaValidator.required();
+                    let propertySchemaValidatorKey = {};
+                    propertySchemaValidatorKey[property] = propertySchemaValidator;
+                    schemaValidator = schemaValidator.keys(propertySchemaValidatorKey);
                 }
-
-                let propertySchemaValidatorKey = {};
-                propertySchemaValidatorKey[property] = propertySchemaValidator;
-                schemaValidator = schemaValidator.keys(propertySchemaValidatorKey);
             }
         }
     } else if ('number' === schema.$type) {
