@@ -1,32 +1,60 @@
 import * as Joi from 'joi';
+import * as _ from 'lodash';
 
 export function validate(schema, payload, options?) {
-    if (!Joi.validate(payload, Joi[schema.$type]())) {
-        return false;
+    let validation = Joi.validate(payload, Joi[schema.$type]());
+    if (validation.error) {
+        return { isValid: false, message: validation.error };
     }
 
-    switch (schema.$type) {
-        case 'number':
-            if (schema.$minimum) {
-                if (!Joi.validate(payload, Joi[schema.$type]().min(payload))) {
-                    return false;
-                }
+    options = options ? _.clone(options) : {};
 
-                if (!Joi.validate(payload, Joi[schema.$type]().max(payload))) {
-                    return false;
-                }
-            }
-            break;
+    validation = Joi.validate(payload, generateSchemaValidator(schema, options));
+    if (validation.error) {
+        return { isValid: false, message: validation.error };
     }
 
-    for (let i = 0; schema.$properties && i < schema.$properties.length; ++i) {
-        let property = schema.$properties[i];
-
-        let subSchema = schema[property];
-        if (!validate(subSchema, payload[property])) {
-            return false;
-        }
-    }
-
-    return true;
+    return { isValid: true };
 };
+
+function generateSchemaValidator(schema, options?) {
+    let schemaValidator;
+    if ('object' === schema.$type) {
+        schemaValidator = Joi.object();
+
+        if (_.has(options, 'depth')) {
+            --options.depth;
+        }
+
+        if (!_.has(options, 'depth') || 0 <= options.depth) {
+            for (let i = 0; schema.$properties && i < schema.$properties.length; ++i) {
+                let property = schema.$properties[i];
+                let propertySchema = schema[property];
+
+                let propertySchemaValidator = generateSchemaValidator(propertySchema);
+
+                if (!schema.$required || _.includes(schema.$required, property)) {
+                    propertySchemaValidator = propertySchemaValidator.required();
+                }
+
+                let propertySchemaValidatorKey = {};
+                propertySchemaValidatorKey[property] = propertySchemaValidator;
+                schemaValidator = schemaValidator.keys(propertySchemaValidatorKey);
+            }
+        }
+    } else if ('number' === schema.$type) {
+        schemaValidator = Joi.number();
+
+        if (_.has(schema, '$minimum')) {
+            schemaValidator = schemaValidator.min(schema.$minimum);
+        }
+
+        if (_.has(schema, '$maximum')) {
+            schemaValidator = schemaValidator.max(schema.$maximum);
+        }
+    } else {
+        schemaValidator = Joi[schema.$type]();
+    }
+
+    return schemaValidator;
+}
