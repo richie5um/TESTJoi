@@ -71,7 +71,7 @@ describe('joi validation', () => {
                 });
             });
 
-            fit('required only', () => {
+            it('required only', () => {
                 let obj = {
                     hello: 'world'
                 };
@@ -79,7 +79,7 @@ describe('joi validation', () => {
                 expect(Joi.validate(obj, this.schema).error).toBeNull();
             });
 
-            fit('required and optional', () => {
+            it('required and optional', () => {
                 let obj = {
                     hello: 'world',
                     world: 'hello'
@@ -88,7 +88,7 @@ describe('joi validation', () => {
                 expect(Joi.validate(obj, this.schema).error).toBeNull();
             });
 
-            fit('required and invalid optional', () => {
+            it('required and invalid optional', () => {
                 let obj = {
                     hello: 'world',
                     world: 1
@@ -110,7 +110,7 @@ describe('joi validation', () => {
                 });
             });
 
-            fit('required only', () => {
+            it('required only', () => {
                 let obj = {
                     hello: 'world'
                 };
@@ -118,7 +118,7 @@ describe('joi validation', () => {
                 expect(Joi.validate(obj, this.schema).error).toBeNull();
             });
 
-            fit('required and optional', () => {
+            it('required and optional', () => {
                 let obj = {
                     hello: 'world',
                     world: {
@@ -130,7 +130,7 @@ describe('joi validation', () => {
                 expect(Joi.validate(obj, this.schema).error).toBeNull();
             });
 
-            fit('required and invalid optional', () => {
+            it('required and invalid optional', () => {
                 let obj = {
                     hello: 'world',
                     world: 1
@@ -153,7 +153,7 @@ describe('joi validation', () => {
                 });
             });
 
-            fit('required only', () => {
+            it('required only', () => {
                 let obj = {
                     id: 'd5483f58-9caf-4f2c-a180-956956e9a60f',
                     username: 'alex1234',
@@ -165,5 +165,6 @@ describe('joi validation', () => {
 
                 expect(Joi.validate(obj, this.schema).error).toBeNull();
             });
+        });
     });
 });
