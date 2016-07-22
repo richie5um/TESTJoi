@@ -9,7 +9,7 @@ describe('joi validation', () => {
         });
 
         it('is not a number', () => {
-            expect(Joi.validate('a', Joi.number()).error).toBeDefined();
+            expect(Joi.validate('a', Joi.number()).error).not.toBeNull();
         });
 
         it('is not a number (assert)', () => {
@@ -20,6 +20,18 @@ describe('joi validation', () => {
             expect(Joi.validate({ a: 1 }, Joi.object()).error).toBeNull();
         });
 
+        it('is a boolean', () => {
+            expect(Joi.validate(true, Joi.boolean()).error).toBeNull();
+        });
+
+        it('is a boolean', () => {
+            expect(Joi.validate(false, Joi.boolean()).error).toBeNull();
+        });
+
+        it('is not a boolean', () => {
+            expect(Joi.validate(0, Joi.boolean().strict()).error).not.toBeNull();
+            expect(Joi.validate(1, Joi.boolean().strict()).error).not.toBeNull();
+        });
     });
 
     describe('create', () => {
@@ -46,7 +58,7 @@ describe('joi validation', () => {
                 b: 'hello'
             };
 
-            expect(Joi.validate(obj, this.joiSchema).error).toBeDefined();
+            expect(Joi.validate(obj, this.joiSchema).error).not.toBeNull();
         });
     });
 
@@ -94,7 +106,7 @@ describe('joi validation', () => {
                     world: 1
                 };
 
-                expect(Joi.validate(obj, this.schema).error).toBeDefined();
+                expect(Joi.validate(obj, this.schema).error).not.toBeNull();
             });
         });
 
@@ -136,7 +148,7 @@ describe('joi validation', () => {
                     world: 1
                 };
 
-                expect(Joi.validate(obj, this.schema).error).toBeDefined();
+                expect(Joi.validate(obj, this.schema).error).not.toBeNull();
             });
         });
 

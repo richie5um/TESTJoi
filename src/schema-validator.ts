@@ -2,6 +2,10 @@ import * as Joi from 'joi';
 import * as _ from 'lodash';
 
 export function validate(schema, payload, options?) {
+    if (!schema || !payload) {
+        return { isValid: false, message: 'Invalid arguments' };
+    }
+
     let validation = Joi.validate(payload, Joi[schema.$type]());
     if (validation.error) {
         return { isValid: false, message: validation.error };
@@ -9,7 +13,8 @@ export function validate(schema, payload, options?) {
 
     options = options ? _.clone(options) : {};
 
-    validation = Joi.validate(payload, generateSchemaValidator(schema, options));
+    let schemaValidator = generateSchemaValidator(schema, options);
+    validation = Joi.validate(payload, schemaValidator);
     if (validation.error) {
         return { isValid: false, message: validation.error };
     }
@@ -19,7 +24,13 @@ export function validate(schema, payload, options?) {
 
 function generateSchemaValidator(schema, options?) {
     let schemaValidator;
-    if ('object' === schema.$type) {
+    if ('array' === schema.$type) {
+        schemaValidator = Joi.array();
+        schema.$type = 'object';
+        let propertySchemaValidator = generateSchemaValidator(schema, options);
+        schemaValidator = schemaValidator.items(propertySchemaValidator);
+        schema.$type = 'array';
+    } else if ('object' === schema.$type) {
         if (_.has(options, 'depth')) {
             --options.depth;
         }
@@ -39,6 +50,7 @@ function generateSchemaValidator(schema, options?) {
 
                     let propertySchemaValidatorKey = {};
                     propertySchemaValidatorKey[property] = propertySchemaValidator;
+
                     schemaValidator = schemaValidator.keys(propertySchemaValidatorKey);
                 }
             }
@@ -52,6 +64,13 @@ function generateSchemaValidator(schema, options?) {
 
         if (_.has(schema, '$maximum')) {
             schemaValidator = schemaValidator.max(schema.$maximum);
+        }
+    } else if ('boolean' === schema.$type) {
+        schemaValidator = Joi.boolean().strict();
+    } else if ('string' === schema.$type) {
+        schemaValidator = Joi.string();
+        if (_.has(schema, '$pattern')) {
+            schemaValidator = schemaValidator.regex(new RegExp(schema.$pattern));
         }
     } else {
         schemaValidator = Joi[schema.$type]();

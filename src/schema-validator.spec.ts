@@ -33,6 +33,13 @@ describe('Index Validation', () => {
                 }
             });
 
+            it('empty object', () => {
+	             let obj = {};
+
+                 expect(SchemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(false);
+            });
+
+
             it('valid shallow object', () => {
 	             let obj = {
                     hello: 2,
