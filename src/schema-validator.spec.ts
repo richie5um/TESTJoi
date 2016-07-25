@@ -5,6 +5,7 @@ import * as SchemaValidator from './schema-validator';
 import * as Schema from './schema';
 
 describe('Index Validation', () => {
+    this.schemaValidator = new SchemaValidator.Validator();
 
     describe('simple schema', () => {
         describe('simple', () => {
@@ -36,7 +37,7 @@ describe('Index Validation', () => {
             it('empty object', () => {
 	             let obj = {};
 
-                 expect(SchemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(false);
+                 expect(this.schemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(false);
             });
 
 
@@ -46,7 +47,7 @@ describe('Index Validation', () => {
                     world: false
                 };
 
-                 expect(SchemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(true);
+                 expect(this.schemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(true);
             });
 
             it('invalid deep object', () => {
@@ -55,7 +56,7 @@ describe('Index Validation', () => {
                     world: false
                 };
 
-                 expect(SchemaValidator.validate(this.schema, obj).isValid).toBe(false);
+                 expect(this.schemaValidator.validate(this.schema, obj).isValid).toBe(false);
             });
 
             it('valid deep object', () => {
@@ -67,7 +68,7 @@ describe('Index Validation', () => {
                     }
                 };
 
-                 expect(SchemaValidator.validate(this.schema, obj).isValid).toBe(true);
+                 expect(this.schemaValidator.validate(this.schema, obj).isValid).toBe(true);
             });
 
 
@@ -77,7 +78,7 @@ describe('Index Validation', () => {
                     world: false
                 };
 
-                expect(SchemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(false);
+                expect(this.schemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(false);
             });
 
             it('required', () => {
@@ -85,7 +86,7 @@ describe('Index Validation', () => {
                     hello: 3
                 };
 
-                expect(SchemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(true);
+                expect(this.schemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(true);
             });
 
             it('missing required', () => {
@@ -93,7 +94,7 @@ describe('Index Validation', () => {
                     world: true
                 };
 
-                expect(SchemaValidator.validate(this.schema, obj).isValid).toBe(false);
+                expect(this.schemaValidator.validate(this.schema, obj).isValid).toBe(false);
             });
         });
     });
@@ -113,7 +114,7 @@ describe('Index Validation', () => {
                     enabled: false
                 };
 
-                expect(SchemaValidator.validate(securitySchema, obj, {depth: 1}).isValid).toBe(true);
+                expect(this.schemaValidator.validate(securitySchema, obj, {depth: 1}).isValid).toBe(true);
             });
 
             it('invalid field', () => {
@@ -124,7 +125,7 @@ describe('Index Validation', () => {
                     enabled1: false
                 };
 
-                expect(SchemaValidator.validate(securitySchema, obj, {depth: 1}).isValid).toBe(false);
+                expect(this.schemaValidator.validate(securitySchema, obj, {depth: 1}).isValid).toBe(false);
             });
 
 
@@ -140,7 +141,7 @@ describe('Index Validation', () => {
                     }
                 };
 
-                expect(SchemaValidator.validate(securitySchema, obj).isValid).toBe(true);
+                expect(this.schemaValidator.validate(securitySchema, obj).isValid).toBe(true);
             });
         });
     });

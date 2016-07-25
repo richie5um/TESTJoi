@@ -32,6 +32,13 @@ describe('joi validation', () => {
             expect(Joi.validate(0, Joi.boolean().strict()).error).not.toBeNull();
             expect(Joi.validate(1, Joi.boolean().strict()).error).not.toBeNull();
         });
+
+        it('is a string', () => {
+            expect(Joi.validate('a', Joi.string()).error).toBeNull();
+            expect(Joi.validate('', Joi.string().allow('')).error).toBeNull();
+            expect(Joi.validate('', Joi.string()).error).not.toBeNull();
+        });
+
     });
 
     describe('create', () => {
