@@ -5,13 +5,12 @@ import * as SchemaValidator from './schema-validator';
 import * as Schema from './schema';
 
 describe('Index Validation', () => {
-    this.schemaValidator = new SchemaValidator.Validator();
 
     describe('simple schema', () => {
         describe('simple', () => {
 
             beforeAll(() => {
-                this.schema = {
+                this.simpleSchema = {
                     $type: 'object',
                     $properties: ['hello', 'world', 'deep'],
                     $required: ['hello', 'deep'],
@@ -31,117 +30,185 @@ describe('Index Validation', () => {
                             $maximum: 10
                         }
                     }
-                }
+                };
+
+                this.schema = new SchemaValidator.Validator({ schema: this.simpleSchema });
             });
 
             it('empty object', () => {
-	             let obj = {};
-
-                 expect(this.schemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(false);
-            });
-
-
-            it('valid shallow object', () => {
-	             let obj = {
-                    hello: 2,
-                    world: false
+                let test = {
+                    path: '/',
+                    policy: {}
                 };
 
-                 expect(this.schemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(true);
+                try {
+                    let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                    expect(schemaValidation.isValid).toBe(false);
+                } catch (err) {
+                    expect(err.name).toEqual('PolicyValidationErr');
+                }
             });
 
-            it('invalid deep object', () => {
-	             let obj = {
-                    hello: 2,
-                    world: false
-                };
-
-                 expect(this.schemaValidator.validate(this.schema, obj).isValid).toBe(false);
-            });
-
-            it('valid deep object', () => {
-	             let obj = {
-                    hello: 2,
-                    world: false,
-                    deep: {
-                        subDeep: 2
+            it('invalid object', () => {
+                let test = {
+                    path: '/',
+                    policy: {
+                        hello: 2,
+                        world: false
                     }
                 };
 
-                 expect(this.schemaValidator.validate(this.schema, obj).isValid).toBe(true);
+                try {
+                    let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                    expect(schemaValidation.isValid).toBe(false);
+                } catch (err) {
+                    expect(err.name).toEqual('PolicyValidationErr');
+                }
             });
 
-
-            it('invalid object - number too big', () => {
-	             let obj = {
-                    hello: 5,
-                    world: false
+            it('valid object', () => {
+                let test = {
+                    path: '/',
+                    policy: {
+                        hello: 2,
+                        world: false,
+                        deep: {
+                            subDeep: 2
+                        }
+                    }
                 };
 
-                expect(this.schemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(false);
+                try {
+                    let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                    expect(schemaValidation.isValid).toBe(true);
+                } catch (err) {
+                    expect(err).toBeNull();
+                }
+            });
+
+            it('invalid object - number too big', () => {
+                let test = {
+                    path: '/',
+                    policy: {
+                        hello: 2,
+                        world: false,
+                        deep: {
+                            subDeep: 11
+                        }
+                    }
+                };
+
+                try {
+                    let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                    expect(schemaValidation.isValid).toBe(false);
+                } catch (err) {
+                    expect(err.name).toEqual('PolicyValidationErr');
+                }
             });
 
             it('required', () => {
-	             let obj = {
-                    hello: 3
+                let test = {
+                    path: '/',
+                    policy: {
+                        hello: 2,
+                        deep: {
+                            subDeep: 2
+                        }
+                    }
                 };
 
-                expect(this.schemaValidator.validate(this.schema, obj, {depth: 1}).isValid).toBe(true);
+                try {
+                    let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                    expect(schemaValidation.isValid).toBe(true);
+                } catch (err) {
+                    expect(err).toBeNull();
+                }
             });
 
-            it('missing required', () => {
-	             let obj = {
-                    world: true
+            it('missing requireds', () => {
+                let test = {
+                    path: '/',
+                    policy: {
+                        world: true
+                    }
                 };
 
-                expect(this.schemaValidator.validate(this.schema, obj).isValid).toBe(false);
+                try {
+                    let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                    expect(schemaValidation.isValid).toBe(false);
+                } catch (err) {
+                    expect(err.name).toEqual('PolicyValidationErr');
+                }
             });
         });
     });
 
     describe('vstar schema', () => {
+
         describe('simple', () => {
 
             beforeAll(() => {
-                this.schema = Schema.schema();
+
+                this.schema = new SchemaValidator.Validator(Schema.schema());
             });
 
             it('valid fields', () => {
-                let securitySchema = _.get(this.schema, 'console.application_control.security_posture');
 
-                let obj = {
-                    state: 2,
-                    enabled: false
+                let test = {
+                    path: '/console/application_control/security_posture',
+                    policy: {
+                        state: 2,
+                        enabled: false
+                    }
                 };
 
-                expect(this.schemaValidator.validate(securitySchema, obj, {depth: 1}).isValid).toBe(true);
+                try {
+                    let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                    expect(schemaValidation.isValid).toBe(true);
+                } catch (err) {
+                    expect(err).toBeNull();
+                }
             });
 
             it('invalid field', () => {
-                let securitySchema = _.get(this.schema, 'console.application_control.security_posture');
 
-                let obj = {
-                    state: 2,
-                    enabled1: false
+                let test = {
+                    path: '/console/application_control/security_posture',
+                    policy: {
+                        state: 2,
+                        enabled1: false
+                    }
                 };
 
-                expect(this.schemaValidator.validate(securitySchema, obj, {depth: 1}).isValid).toBe(false);
+                try {
+                    let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                    expect(schemaValidation.isValid).toBe(false);
+                } catch (err) {
+                    expect(err.name).toEqual('PolicyValidationErr');
+                }
             });
 
 
             it('console message_settings', () => {
-                let securitySchema = _.get(this.schema, 'console.settings.application_control.message_settings');
 
-                let obj = {
-                    access_denied: {
-                        title: 'Title',
-                        body: 'Body',
-                        width: 1,
-                        height: 1,
+                let test = {
+                    path: '/console/settings/application_control/message_settings',
+                    policy: {
+                        access_denied: {
+                            title: 'Title',
+                            body: 'Body',
+                            width: 1,
+                            height: 1,
+                        }
                     }
                 };
 
-                expect(this.schemaValidator.validate(securitySchema, obj).isValid).toBe(true);
+                try {
+                    let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                    expect(schemaValidation.isValid).toBe(true);
+                } catch (err) {
+                    expect(err).toBeNull();
+                }
             });
         });
     });

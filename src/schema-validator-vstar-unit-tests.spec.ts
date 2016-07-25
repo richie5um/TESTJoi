@@ -4,20 +4,12 @@ import * as Joi from 'joi';
 import * as SchemaValidator from './schema-validator';
 import * as Schema from './schema-vstar-unit-tests';
 
-let pathToDotted = (path) => {
-    path = path || '';
-
-    if (0 < path.length && '/' === path[0]) {
-        path = path.slice(1);
-    }
-    path = path.replace(/\/+/g, '.');
-
-    return path;
-};
-
 describe('Index Validation', () => {
 
     describe('vstar-unit-tests', () => {
+
+        this.schema = new SchemaValidator.Validator(Schema.schema());
+
         // describe('fail tests', () => {
         //     fit('test', () => {
         //         this.schema = Schema.schema();
@@ -35,9 +27,6 @@ describe('Index Validation', () => {
         // });
 
         describe('fail test', () => {
-
-            this.schemaValidator = new SchemaValidator.Validator();
-            this.schema = Schema.schema();
 
             this.failTests = [
                 { policy: {}, path: '/settings/array' },
@@ -64,38 +53,32 @@ describe('Index Validation', () => {
             ];
 
             this.failTests.forEach((test, index) => {
-                it('validate policy - fails and throws PolicyValidationError ' + index, () => {
-                    let path = pathToDotted(test.path);
-                    let validateSchema = path ? _.get(this.schema, path) : this.schema;
+                it('validate policy - fails and throws PolicyValidationErr ' + index, () => {
 
-                    console.log(`${path} for ${test.policy} in ${JSON.stringify(validateSchema)}`);
-
-                    let schemaValidation = this.schemaValidator.validate(validateSchema, test.policy);
-                    expect(schemaValidation.isValid).toBe(false);
+                    try {
+                        let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                        expect(schemaValidation.isValid).toBe(false);
+                    } catch (err) {
+                        expect(err.name).toEqual('PolicyValidationErr');
+                    }
                 });
             });
         });
 
         describe('success test', () => {
             it('test', () => {
-                this.schema = Schema.schema();
-
                 let test = { policy: '', path: '/settings/sub-object/string' };
-                let path = pathToDotted(test.path);
 
-                let validateSchema = path ? _.get(this.schema, path) : this.schema;
-
-                console.log(`${path} for ${JSON.stringify(test.policy)} in ${JSON.stringify(validateSchema)}`);
-
-                let schemaValidation = this.schemaValidator.validate(validateSchema, test.policy);
-                expect(schemaValidation.isValid).toBe(true);
+                try {
+                    let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                    expect(schemaValidation.isValid).toBe(true);
+                } catch (err) {
+                    expect(err).toBeNull();
+                }
             });
         });
 
         describe('success tests', () => {
-
-            this.schemaValidator = new SchemaValidator.Validator();
-            this.schema = Schema.schema();
 
             this.successTests = [
                 { policy: [], path: '/settings/array' },
@@ -134,13 +117,13 @@ describe('Index Validation', () => {
 
             this.successTests.forEach((test, index) => {
                 it('validate policy - success - no error thrown ' + index, () => {
-                    let path = pathToDotted(test.path);
-                    let validateSchema = path ? _.get(this.schema, path) : this.schema;
 
-                    console.log(`${path} for ${test.policy} in ${JSON.stringify(validateSchema)}`);
-
-                    let schemaValidation = this.schemaValidator.validate(validateSchema, test.policy);
-                    expect(schemaValidation.isValid).toBe(true);
+                    try {
+                        let schemaValidation = this.schema.validatePolicy(test.policy, test.path);
+                        expect(schemaValidation.isValid).toBe(true);
+                    } catch (err) {
+                        expect(err).toBeNull();
+                    }
                 });
             });
         });

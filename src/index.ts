@@ -1,10 +1,8 @@
 
-export function hello () {
-    console.log('world');
+export function returnTrue () {
     return true;
 };
 
-export function world () {
-    console.log('hello');
-    return true;
+export function returnFalse () {
+    return false;
 };

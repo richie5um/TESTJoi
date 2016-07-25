@@ -4,12 +4,12 @@ describe('Index Validation', () => {
 
     describe('simple', () => {
 
-        it('hello', () => {
-            expect(Index.hello()).toBe(true);
+        it('True check', () => {
+            expect(Index.returnTrue()).toBe(true);
         });
 
-        it('world', () => {
-            expect(Index.world()).toBe(true);
+        it('False check', () => {
+            expect(Index.returnFalse()).toBe(false);
         });
 
     });
